@@ -1,0 +1,24 @@
+services:
+  test-db:
+    image: postgres:16-alpine
+    container_name: postgres_test_env
+    environment:
+      # These define your initial DB setup
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+    ports:
+      - "5432:5432"
+    volumes:
+      # 1. Mount your schema/seed scripts so they run on startup
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      # 2. Use a named volume for data persistence (optional for tests)
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_test_data:
